@@ -28,7 +28,7 @@ package com.wlwl.cube.analyse.common;
 * @date 2016年10月16日 上午10:25:58
 *
 */ 
-public class Conf {
+public class ConfShangqi {
 	/* Redis 设置*/
 	public static final String REDIS_HOST_KEY = "";
 	public static final String REDIS_PORT_KEY = "";

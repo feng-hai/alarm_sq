@@ -649,6 +649,7 @@ public class RedisUtils {
 		return res;
 	}
 
+	
 	/**
 	 * <p>
 	 * 通过key同时设置 hash的多个field
@@ -672,7 +673,6 @@ public class RedisUtils {
 		}
 		return res;
 	}
-
 	/**
 	 * <p>
 	 * 通过key 和 field 获取指定的 value

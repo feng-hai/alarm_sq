@@ -32,17 +32,13 @@ import org.apache.storm.topology.TopologyBuilder;
 
 import org.apache.storm.tuple.Fields;
 
-import com.wlwl.cube.ananlyse.functions.CreateVehicleModelFunction;
-import com.wlwl.cube.ananlyse.functions.DeviceIDFunction;
-import com.wlwl.cube.ananlyse.functions.SaveValueToHBaseFunction;
-import com.wlwl.cube.ananlyse.functions.SaveValueToRedisFunction;
-import com.wlwl.cube.ananlyse.functions.VehicleAlarmFetchFunction;
-import com.wlwl.cube.ananlyse.functions.VehicleChargeFunction;
-import com.wlwl.cube.ananlyse.functions.VehicleStatusFunction;
+import com.wlwl.cube.analyse.filter.VehicleFilter;
+import com.wlwl.cube.ananlyse.functionsForAlarm.AnalysisAlarmDataFunction;
+import com.wlwl.cube.ananlyse.functionsForAlarm.ChangeForAlarmFunction;
+import com.wlwl.cube.ananlyse.functionsForAlarm.CreateVehicleModelFunction;
+import com.wlwl.cube.ananlyse.functionsForAlarm.DeviceIDForAlarmFunction;
 import com.wlwl.cube.hbase.HBaseQueryVehicleFactory;
 import com.wlwl.cube.hbase.HBaseVehicleUpdate;
-import com.wlwl.cube.redis.QueryVehiclesFactory;
-import com.wlwl.cube.redis.RedisUpdate;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.storm.kafka.StringScheme;
@@ -58,13 +54,13 @@ import org.apache.storm.trident.testing.MemoryMapState;
 
 import java.util.Properties;
 
-public class TridentKafkaSpoutForAlarm {
+public class TridentKafkaSpoutAlarm {
 
 	private String zkUrl;
 	private String brokerUrl;
 	private String topicId;
 
-	public TridentKafkaSpoutForAlarm(String zkUrl, String brokerUrl, String topicId) {
+	public TridentKafkaSpoutAlarm(String zkUrl, String brokerUrl, String topicId) {
 		this.zkUrl = zkUrl;
 		this.brokerUrl = brokerUrl;
 		this.topicId = topicId;
@@ -72,13 +68,17 @@ public class TridentKafkaSpoutForAlarm {
 
 	public TransactionalTridentKafkaSpout createKafkaSpout() {
 		ZkHosts hosts = new ZkHosts(zkUrl);
-		TridentKafkaConfig config = new TridentKafkaConfig(hosts, topicId,"vehicleAlarm");
+		TridentKafkaConfig config = new TridentKafkaConfig(hosts, topicId, "vehicleAlarm");
 		config.scheme = new SchemeAsMultiScheme(new StringScheme());
 		// Consume new data from the topic
 		config.ignoreZkOffsets = true;
-	
-		config.startOffsetTime =kafka.api.OffsetRequest.LatestTime(); // -2 从kafka头开始  -1 是从最新的开始 0 =无 从ZK开始 kafka.api.OffsetRequest.LatestTime();
-		
+		config.startOffsetTime = kafka.api.OffsetRequest.LatestTime(); // -2
+																		// 从kafka头开始
+																		// -1
+																		// 是从最新的开始
+																		// 0 =无
+																		// 从ZK开始
+																		// kafka.api.OffsetRequest.LatestTime();
 		return new TransactionalTridentKafkaSpout(config);
 	}
 
@@ -96,23 +96,21 @@ public class TridentKafkaSpoutForAlarm {
 		// addDRPCStream(tridentTopology, addTridentState(tridentTopology),
 		// drpc);
 
-		tridentTopology.newStream("spoutAlarm", createKafkaSpout()).parallelismHint(1)
-		
-				.each(new Fields("str"), new CreateVehicleModelFunction(), new Fields("vehicle")).parallelismHint(1)
+		tridentTopology.newStream("spoutVehicle", createKafkaSpout()).parallelismHint(3)
+				.each(new Fields("str"), new CreateVehicleModelFunction(), new Fields("vehicle")).parallelismHint(3)
+				.each(new Fields("vehicle"), new VehicleFilter())
+				.each(new Fields("vehicle"), new DeviceIDForAlarmFunction(), new Fields("deviceId")).parallelismHint(3)
+				.partitionBy(new Fields("deviceId")).parallelismHint(3)
+				.each(new Fields("vehicle"), new AnalysisAlarmDataFunction(), new Fields("vehicleInfo"))
+				.parallelismHint(4)
 				
-				.each(new Fields("vehicle"), new DeviceIDFunction(), new Fields("deviceId"))
-				
-				.partitionBy(new Fields("deviceId"))
-		
-				.each(new Fields("deviceId","vehicle"), new VehicleAlarmFetchFunction(), new Fields("vehicleInfo"))
-				
-				.partitionPersist(new QueryVehiclesFactory(), new Fields("vehicleInfo"), new RedisUpdate());
+				// //.each(new Fields("countInfo"), new
+				// SaveValueToHBaseFunction(), new Fields("vehicleInfo"))
+				.partitionPersist(new HBaseQueryVehicleFactory(), new Fields("vehicleInfo"), new HBaseVehicleUpdate())
+				.parallelismHint(16);
 
 		return tridentTopology.build();
 	}
-	
-	
-	
 
 	/**
 	 * Return the consumer topology config.
@@ -122,6 +120,7 @@ public class TridentKafkaSpoutForAlarm {
 	public Config getConsumerConfig() {
 		Config conf = new Config();
 		conf.setMaxSpoutPending(20);
+
 		// conf.setDebug(true);
 		return conf;
 	}
@@ -136,7 +135,7 @@ public class TridentKafkaSpoutForAlarm {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public StormTopology buildProducerTopology(Properties prop) {
 		TopologyBuilder builder = new TopologyBuilder();
-		builder.setSpout("spout", new RandomSentenceSpout(), 2);
+		// builder.setSpout("spout", new RandomSentenceSpout(), 2);
 		/**
 		 * The output field of the RandomSentenceSpout ("word") is provided as
 		 * the boltMessageField so that this gets written out as the message in
@@ -159,7 +158,6 @@ public class TridentKafkaSpoutForAlarm {
 	 */
 	public Properties getProducerConfig() {
 		Properties props = new Properties();
-
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
 		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,

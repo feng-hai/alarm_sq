@@ -78,12 +78,18 @@ public class ConfLocal {
 	/**
 	* @Fields VEHICLE_STATUS : 定义车辆状态判断条件，在redis中存储的前缀
 	*/ 
-	public static final String VEHICLE_CONDITION_STATUS = "VEHICLE_STATUS_STATE:";
+	public static final String VEHICLE_CONDITION_ALARM_STATUS = "VEHICLE_CONDITION_ALARM_STATUS:";
 	
 	/**
 	* @Fields VEHICLE_CONDITION_CHARGE : 车辆充电的判断条件，存储key
 	*/ 
 	public static final String VEHICLE_CONDITION_CHARGE= "VEHICLE_STATUS_STATE:";
+	
+	
+	/**
+	* @Fields VEHICLE_CONDITION_ALARM : 车辆报警
+	*/ 
+	public static final String VEHICLE_CONDITION_ALARM= "VEHICLE_CONDITION_ALARM:";
 	
 	/**
 	* @Fields ZKURL : zookeeper 地址

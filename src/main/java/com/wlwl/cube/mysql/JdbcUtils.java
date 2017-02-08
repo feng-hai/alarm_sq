@@ -14,12 +14,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.wlwl.cube.analyse.bean.ErrorCode;
 import com.wlwl.cube.analyse.bean.VehicleStatusBean;
 import com.wlwl.cube.analyse.common.Conf;
 import com.wlwl.cube.redis.RedisUtils;
@@ -104,6 +106,33 @@ public class JdbcUtils {
         result = pstmt.executeUpdate();  
         flag = result > 0 ? true : false;  
         return flag;  
+    }  
+    
+    public int insertByPreparedStatement(String sql, List<Object>params)throws SQLException{  
+        boolean flag = false;  
+        int result = -1;  
+        if(connection.isClosed())
+        {
+        	getConnection();
+        }
+        pstmt = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);  
+        int index = 1;  
+        if(params != null && !params.isEmpty()){  
+            for(int i=0; i<params.size(); i++){  
+                pstmt.setObject(index++, params.get(i));  
+            }  
+        }  
+        pstmt.execute();  
+        ResultSet rs = pstmt.getGeneratedKeys();
+    	if (rs.next())
+		{
+			int aiid = rs.getInt( 1 );
+			pstmt.close();
+			return aiid;
+			
+		}
+    	pstmt.close();
+        return -1;  
     }  
   
     /** 
@@ -288,12 +317,12 @@ public class JdbcUtils {
      * @param args 
      */  
     public static void main(String[] args) throws SQLException {  
-    	RedisUtils util = new RedisUtils();
-    	Set<String> set = util.keys(Conf.PERFIX + "*");
-
-		for (String str : set) {
-			System.out.println(str);
-		}
+//    	RedisUtils util = new RedisUtils();
+//    	Set<String> set = util.keys(Conf.PERFIX + "*");
+//
+//		for (String str : set) {
+//			System.out.println(str);
+//		}
     
         // TODO Auto-generated method stub  
         JdbcUtils jdbcUtils = new JdbcUtils();  
@@ -332,21 +361,45 @@ public class JdbcUtils {
         params.add("李四"); 
         boolean flag = jdbcUtils.updateByPreparedStatement(sql, params); 
         System.out.println(flag);*/  
-  
-        /*******************查*********************/  
         
-        
-    	String sql = "SELECT code,option,value,VALUE_LAST ,status  FROM cube.PDA_VEHICLE_DETAIL where fiber_unid=?";
+    	String sql = "SELECT description,ERROR_CODE,FIBER_UNID,level,name FROM cube.BIG_ERROR_CODE";
 		List<Object> params = new ArrayList<Object>();
-		params.add("90A62ABEA6DB415D93D17DD31FBD5A1B");
-		List<VehicleStatusBean> list = null;
+
+
+	
+	
+		List<ErrorCode> list = null;
 		try {
-			list = (List<VehicleStatusBean>) jdbcUtils.findMoreRefResult(sql, params, VehicleStatusBean.class);
-			System.out.println(list);
+			List<Map<String, Object>>temp=	jdbcUtils.findModeResult(sql, params);
+			list = (List<ErrorCode>) jdbcUtils.findMoreRefResult(sql, params, ErrorCode.class);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+//		Map<String, ErrorCode> map = new HashMap<String, ErrorCode>();
+//		for (ErrorCode vsbean : list) {
+//			map.put(vsbean.getFiberUnid()+"_"+vsbean.getErrorCode(), vsbean);
+//		}
+
+	
+        
+        
+        
+        /*******************查*********************/  
+        
+        
+//    	String sql = "SELECT code,option,value,VALUE_LAST ,status  FROM cube.PDA_VEHICLE_DETAIL where fiber_unid=?";
+//		List<Object> params = new ArrayList<Object>();
+//		params.add("90A62ABEA6DB415D93D17DD31FBD5A1B");
+//		List<VehicleStatusBean> list = null;
+//		try {
+//			list = (List<VehicleStatusBean>) jdbcUtils.findMoreRefResult(sql, params, VehicleStatusBean.class);
+//			System.out.println(list);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
         //不利用反射查询多个记录  
 //        String sql2 = "SELECT code,option,value,value_last valueLast,status  FROM cube.PDA_VEHICLE_DETAIL "; 
 //        List<Map<String, Object>> list = jdbcUtils.findModeResult(sql2, null); 

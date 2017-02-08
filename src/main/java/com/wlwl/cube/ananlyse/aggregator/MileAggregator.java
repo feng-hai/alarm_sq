@@ -34,28 +34,29 @@ public class MileAggregator implements CombinerAggregator<VehicleStatisticBean> 
 	 * storm.trident.tuple.TridentTuple)
 	 */
 	public VehicleStatisticBean init(TridentTuple tuple) {
-		VehicleStatisticBean example = new VehicleStatisticBean();
-		// 获取里程值
-		ObjectModelOfKafka omok = (ObjectModelOfKafka) tuple.getValueByField("vehicle");
-		System.out.println(omok);
-		Pair totalMile = omok.getAllMile();
-		if (totalMile != null) {
-			String mile = totalMile.getValue();
-			// 定义一个中间变量，
-			// 1、判断是否是第一次，如果是第一次，为开始里程赋值
-			// example.setWorkMile_start(Double.parseDouble(mile));
-			// String deviceId=tuple.getStringByField("deviceId");
-			// 根据deviceId更新redis数据
-			// 设置当前的车辆的总里程
-			System.out.println("init" + example);
-			example.setWorkTotalMile(Double.parseDouble(mile));
-
-			example.setStatisticDateTime(omok.getTIMESTAMP());
-		}
-		System.out.println("#######################################################");
-		System.out.println(example);
-		System.out.println("#######################################################");
-		return example;
+//		VehicleStatisticBean example = new VehicleStatisticBean();
+//		// 获取里程值
+//		ObjectModelOfKafka omok = (ObjectModelOfKafka) tuple.getValueByField("vehicle");
+//		System.out.println(omok);
+//		Pair totalMile = omok.getAllMile();
+//		if (totalMile != null) {
+//			String mile = totalMile.getValue();
+//			// 定义一个中间变量，
+//			// 1、判断是否是第一次，如果是第一次，为开始里程赋值
+//			// example.setWorkMile_start(Double.parseDouble(mile));
+//			// String deviceId=tuple.getStringByField("deviceId");
+//			// 根据deviceId更新redis数据
+//			// 设置当前的车辆的总里程
+//			System.out.println("init" + example);
+//			example.setWorkTotalMile(Double.parseDouble(mile));
+//
+//			example.setStatisticDateTime(omok.getTIMESTAMP());
+//		}
+//		System.out.println("#######################################################");
+//		System.out.println(example);
+//		System.out.println("#######################################################");
+		//return example;
+		return null ;
 	}
 
 	/*

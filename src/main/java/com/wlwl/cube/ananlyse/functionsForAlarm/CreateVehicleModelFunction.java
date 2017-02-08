@@ -6,7 +6,7 @@
 * @date 2016年9月24日 下午1:01:54
 * @version V1.0.0  
 */
-package com.wlwl.cube.ananlyse.functions;
+package com.wlwl.cube.ananlyse.functionsForAlarm;
 
 import java.util.Date;
 import java.util.Timer;
@@ -39,9 +39,15 @@ public class CreateVehicleModelFunction extends BaseFunction {
 	public void execute(TridentTuple tuple, TridentCollector collector) {
 		try {
 			String sentence = tuple.getString(0);
+			//System.out.println(sentence);
+			
+			sentence=	sentence.replace( "DEVICE_ID","device_ID")
+			.replace("TIMESTAMP","timestamp")
+			.replace( "IP4","ip4")
+			.replace( "raw_octets","raw_OCTETS");
 
 			vehicle = JsonUtils.deserialize(
-					sentence.replace("TIMESTAMP", "timestamp").replaceAll("DATIME_RX", "datime_RX"),
+					sentence,
 					ObjectModelOfKafka.class);
 
 			if (vehicle != null) {

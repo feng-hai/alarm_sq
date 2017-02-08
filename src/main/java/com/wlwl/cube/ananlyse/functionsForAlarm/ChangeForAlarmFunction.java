@@ -6,7 +6,7 @@
 * @date 2016年9月26日 上午11:09:56
 * @version V1.0.0  
 */
-package com.wlwl.cube.ananlyse.functions;
+package com.wlwl.cube.ananlyse.functionsForAlarm;
 
 import org.apache.storm.trident.operation.BaseFunction;
 import org.apache.storm.trident.operation.TridentCollector;
@@ -16,7 +16,9 @@ import org.apache.storm.tuple.Values;
 
 import com.wlwl.cube.analyse.bean.ObjectModelOfKafka;
 import com.wlwl.cube.analyse.bean.Pair;
-
+import com.wlwl.cube.analyse.bean.alart3G.Alert;
+import com.wlwl.cube.analyse.common.LatLng;
+import com.wlwl.cube.ananlyse.state.AMapConvertService;
 
 /**
  * @ClassName: DeviceIDFunction
@@ -25,7 +27,7 @@ import com.wlwl.cube.analyse.bean.Pair;
  * @date 2016年9月26日 上午11:09:56
  *
  */
-public class DeviceIDFunction extends BaseFunction {
+public class ChangeForAlarmFunction extends BaseFunction {
 
 	private static final long serialVersionUID = -3430938120228163893L;
 
@@ -38,19 +40,22 @@ public class DeviceIDFunction extends BaseFunction {
 	 * org.apache.storm.trident.operation.TridentCollector)
 	 */
 	public void execute(TridentTuple tuple, TridentCollector collector) {
-		try{
+		try {
 
-		ObjectModelOfKafka vehicleInfo = (ObjectModelOfKafka) tuple.getValueByField("vehicle");
-		Pair pair = vehicleInfo.getVehicle_UNID();
-		if (pair != null) {
-			String device = pair.getValue();
-			collector.emit(new Values(device));
-		}
-		}catch(Exception e)
-		{
+			Alert alert = (Alert) tuple.getValueByField("vehicleInfo");
+			// String deviceid =vehicleInfo.getDEVICE_ID();
+			// if (deviceid!=null&&deviceid.length()>0) {
+			LatLng latlng = AMapConvertService
+					.getConvert(new LatLng(String.valueOf(alert.longitude), String.valueOf(alert.getLatitude())));
+			// //System.out.println(latln
+			alert.setLongitude(Double.parseDouble(latlng.getLng()));
+			alert.setLatitude(Double.parseDouble(latlng.getLat()));
+
+			collector.emit(new Values(alert));
+			// }
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	
 }

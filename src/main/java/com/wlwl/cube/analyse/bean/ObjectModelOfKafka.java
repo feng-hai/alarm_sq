@@ -24,241 +24,102 @@ import com.wlwl.cube.ananlyse.state.JsonUtils;
  */
 
 public class ObjectModelOfKafka implements Serializable {
-	private static final long serialVersionUID = 477223109817573790L;
-	private Date TIMESTAMP = new Date();
-	private List<Pair> pairs = new ArrayList<Pair>();
-	private String DATIME_RX = "";
-
 	/**
-	 * @return tIMESTAMP
+	 * 
 	 */
-	public Date getTIMESTAMP() {
-		return TIMESTAMP;
+	private static final long serialVersionUID = 1L;
+	
+
+	private String DEVICE_ID;//终端编号
+	private String RAW_OCTETS;// 	十六进制码流
+	private String unid;// 	唯一编号
+	private String proto_unid;//协议唯一编号
+	private String node_unid;//节点唯一编号
+	
+	private String cellphone;
+	
+
+	public String getCellphone() {
+		return cellphone;
+	}
+	public void setCellphone(String cellphone) {
+		this.cellphone = cellphone;
 	}
 
-	/**
-	 * @param tIMESTAMP
-	 *            要设置的 tIMESTAMP
-	 */
-	public void setTIMESTAMP(Date tIMESTAMP) {
+	private String length;// 	长度(Byte)
+	private Long TIMESTAMP;// 	UNIX时间戳(毫秒)
+	public Long getTIMESTAMP() {
+		return TIMESTAMP;
+	}
+	public void setTIMESTAMP(Long tIMESTAMP) {
 		TIMESTAMP = tIMESTAMP;
 	}
 
-	/**
-	 * @return pairs
-	 */
-	public List<Pair> getPairs() {
-		return pairs;
-	}
+	private String IP4;//IPv4地址
+	private String flag_transmit="false";// 	转发标志
 
-	/**
-	 * @param pairs
-	 *            要设置的 pairs
-	 */
-	public void setPairs(List<Pair> pairs) {
-		this.pairs = pairs;
-	}
 
-	/**
-	 * @return dATIME_RX
-	 */
-	public String getDATIME_RX() {
-		return DATIME_RX;
-	}
 
-	/**
-	 * @param dATIME_RX
-	 *            要设置的 dATIME_RX
-	 */
-	public void setDATIME_RX(String dATIME_RX) {
-		DATIME_RX = dATIME_RX;
+	public String getNode_unid() {
+		return node_unid;
 	}
-
-	@Override
-	public String toString() {
-		return JsonUtils.serialize(this);
+	public void setNode_unid(String node_unid) {
+		this.node_unid = node_unid;
 	}
-
-	/**
-	 * @Title: getDevice @Description: TODO获取当前信息的终端id @param @return
-	 *         设定文件 @return Pair 返回类型 @throws
-	 */
-	public Pair getVehicle_UNID() {
-		Pair pair = null;
-		for (Pair p : pairs) {
-			if (p.getCode().equals("ENTITY_UNID")) {
-				pair = p;
-				break;
-			}
-		}
-		return pair;
+	public String getDEVICE_ID() {
+		return DEVICE_ID;
+	}
+	public void setDEVICE_ID(String dEVICE_ID) {
+		DEVICE_ID = dEVICE_ID;
+	}
+	public String getRAW_OCTETS() {
+		return RAW_OCTETS;
+	}
+	public void setRAW_OCTETS(String rAW_OCTETS) {
+		RAW_OCTETS = rAW_OCTETS;
+	}
+	public String getUnid() {
+		return unid;
+	}
+	public void setUnid(String unid) {
+		this.unid = unid;
+	}
+	public String getProto_unid() {
+		return proto_unid;
+	}
+	public void setProto_unid(String proto_unid) {
+		this.proto_unid = proto_unid;
+	}
+	public String getLength() {
+		return length;
+	}
+	public void setLength(String length) {
+		this.length = length;
 	}
 	
-	/**
-	* @Title: getDeviceId
-	* @Description: 获取终端id
-	* @param @return    设定文件
-	* @return Pair    返回类型
-	* @throws
-	*/ 
-	public Pair getDeviceId()
+	public String getIP4() {
+		return IP4;
+	}
+	public void setIP4(String iP4) {
+		IP4 = iP4;
+	}
+	public String getFlag_transmit() {
+		return flag_transmit;
+	}
+	public void setFlag_transmit(String flag_transmit) {
+		this.flag_transmit = flag_transmit;
+	}
+	
+	public String toString()
 	{
-		Pair pair = null;
-		for (Pair p : pairs) {
-			if (p.getAlias().equals("DEVICE_ID")) {
-				pair = p;
-				break;
-			}
-		}
-		return pair;
-	}
-
-	/**
-	 * @Title: getSpeed @Description: TODO速度 @param @return 设定文件 @return Pair
-	 * 返回类型 @throws
-	 */
-	public Pair getSpeed() {
-		Pair pair = null;
-		for (Pair p : pairs) {
-			if (p.getAlias().equals("SPEED_GPS")) {
-				pair = p;
-				break;
-			}
-		}
-		return pair;
-
-	}
-
-	/**
-	 * @Title: getTotalFuel @Description: TODO车辆总油耗 @param @return 设定文件 @return
-	 * Pair 返回类型 @throws
-	 */
-	public Pair getTotalFuel() {
-		Pair pair = null;
-		for (Pair p : pairs) {
-			if (p.getAlias().equals("FUEL_CONSUM_TOTAL")) {
-				pair = p;
-				break;
-			}
-		}
-		return pair;
-
-	}
-
-	/**
-	 * @Title: getAllMile @Description: TODO总里程 @param @return 设定文件 @return Pair
-	 *         返回类型 @throws
-	 */
-	public Pair getAllMile() {
-		for (Pair p : pairs) {
-			if (p.getAlias().equals("MILEAGE")) {
-				return p;
-			}
-		}
-		return new Pair();
-
-	}
-
-	/**
-	 * @Title: getAllEnergy
-	 * @Description: TODO车辆总电耗
-	 * @param
-	 * @return 设定文件 @return Pair 返回类型 @throws
-	 */
-	public Pair getAllEnergy() {
-		for (Pair p : pairs) {
-			if (p.getAlias() .equals("POWER_CONSUM_TOTAL")) {
-				return p;
-			}
-		}
-		return new Pair();
-	}
-	
-	
-	/**
-	* @Title: getInCharge
-	* @Description: 总充电量
-	* @param @return    设定文件
-	* @return Pair    返回类型
-	* @throws
-	*/ 
-	public Pair getInCharge()
-	{
-		for (Pair p : pairs) {
-			if (p.getAlias() .equals("POWER_CHARING_TOTAL")) {
-				return p;
-			}
-		}
-		return new Pair();	
-    }
-	
-	/**
-	* @Title: getSOC
-	* @Description: 车辆SOC
-	* @param @return    设定文件
-	* @return Pair    返回类型
-	* @throws
-	*/ 
-	public Pair getSOC()
-	{
-		for (Pair p : pairs) {
-			if (p.getAlias() .equals("SOC")) {
-				return p;
-			}
-		}
-		return new Pair();	
+		
+		return JsonUtils.serialize(this)
+				.replace("device_ID", "DEVICE_ID")
+				.replace("timestamp", "TIMESTAMP")
+				.replace("ip4", "IP4")
+				.replace("raw_OCTETS", "raw_octets");
 		
 	}
-
-	/**
-	 * @Title: getChargeStatus @Description: TODO充电状态 @param @return
-	 * 设定文件 @return Pair 返回类型 @throws
-	 */
-	public Pair getChargeStatus() {
-		for (Pair p : pairs) {
-			if (p.getAlias().equals ("ChargeStatus")) {
-				// 判断状态， 默认为false，为true时正在充电
-				p.setValue("false");
-				return p;
-			}
-		}
-		return new Pair();
-	}
-
-	/**
-	 * @Title: getSOC @Description: TODO总电量 @param @return 设定文件 @return Pair
-	 * 返回类型 @throws
-	 */
-	public Pair getChargeAll() {
-
-		for (Pair p : pairs) {
-			if (p.getAlias() .equals("ChargeAll")) {
-				return p;
-			}
-		}
-		return new Pair();
-	}
-
-	/**
-	* @Title: getPairByCode
-	* @Description: TODO 获取对应code的数据
-	* @param @param code
-	* @param @return    设定文件
-	* @return Pair    返回类型
-	* @throws
-	*/ 
-	public Pair getPairByCode(String code) {
-		for (Pair p : pairs) {
-			String pAlias = p.getAlias();
-			if (pAlias.equals(code)) {
-				return p;
-			}
-			String pCode = p.getCode();
-			if (pCode.equals(code)) {
-				return p;
-			}
-		}
-		return null;
-	}
+	//解析报警数据
 
 }
