@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.storm.trident.state.State;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ public class HBaseState implements State {
 	private RedisUtils util = null;
 	private JdbcUtils jdbcUtils = null;
 	SimpleDateFormat DEFAULT_DATE_SIMPLEDATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	SimpleDateFormat DEFAULT_DATE = new SimpleDateFormat("yyyyMM");
 	private static final Logger LOG = LoggerFactory.getLogger(HBaseState.class);
 
 	/*
@@ -85,40 +87,33 @@ public class HBaseState implements State {
 
 	public void setVehicleBulk(List<Alert> alerts) {
 
-		
 		util = RedisSingleton.instance();
 		jdbcUtils = SingletonJDBC.getJDBC();
-	
+
 		try {
 
 			for (Alert alert : alerts) {
 				List<GMSEvent> events = alert.getEvents();
 
 				for (GMSEvent event : events) {
-					
-					
-					if (event.getCode().equals( "969999105" ) || event.getCode().equals( "969999106" )
-							|| event.getCode().equals( "969999107" ))
+
+					if (event.getCode().equals("969999105") || event.getCode().equals("969999106")
+							|| event.getCode().equals("969999107"))
 						continue;// XXX
 
-					if (event.getType() == TYPE_SYSTEM_ERROR || event.getType() == TYPE_THRESHOLD_ERROR)
-					{
-						if (event.getStatus() == STATE_BEGIN)
-						{
+					if (event.getType() == TYPE_SYSTEM_ERROR || event.getType() == TYPE_THRESHOLD_ERROR) {
+						if (event.getStatus() == STATE_BEGIN) {
 							String aiid = util.hget(aiid_key + alert.getUnid(), event.getCode());
-							if(aiid!=null)
-							{
-								event.setFlagEnd( true );
-								event.setDatimeEnd(  DEFAULT_DATE_SIMPLEDATEFORMAT.format(new Date())  );
-								alertEnd(event, alert, "alert");	
+							if (aiid != null) {
+								event.setFlagEnd(true);
+								event.setDatimeEnd(DEFAULT_DATE_SIMPLEDATEFORMAT.format(new Date()));
+								alertEnd(event, alert, "alert");
 							}
 							alertBegin(event, alert, "alert");
-						}
-						else
-							if (event.getStatus() == STATE_END)
-								alertEnd(event, alert, "alert");
+						} else if (event.getStatus() == STATE_END)
+							alertEnd(event, alert, "alert");
 					}
-					
+
 				}
 
 			}
@@ -132,21 +127,24 @@ public class HBaseState implements State {
 
 	private void alertEnd(GMSEvent event, Alert alert, String eventType) {
 		String aiid = util.hget(aiid_key + alert.getUnid(), event.getCode());
+		String dateStr = util.hget(aiid_key + alert.getUnid(), event.getCode() + "beginTime");
 		if (aiid != null) {
 			StringBuilder update = new StringBuilder();
-			update.append("update sensor.ANA_VEHICLE_EVENT set FLAG_DID=1,DATIME_END=");
-			update.append("'").append(event.getDatimeEnd()).append("'");
-			update.append(" where AIID=").append(aiid);
-
+			update.append("CALL `sensor`.`offAlarmting`('");
+			update.append(aiid);
+			update.append("', '");
+			update.append(event.getDatimeEnd());
+			update.append("', '");
+			update.append(dateStr);
+			update.append("')");
 			try {
 				jdbcUtils.updateByPreparedStatement(update.toString(), new ArrayList<Object>());
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 			util.hdel(aiid_key + alert.getUnid(), event.getCode());
-
+			util.hdel(aiid_key + alert.getUnid(), event.getCode() + "beginTime");
 		}
 	}
 
@@ -155,84 +153,58 @@ public class HBaseState implements State {
 		String alarmKey = Conf.VEHICLE_CONDITION_ALARM_STATUS;
 		String unid = alert.getUnid(); // 车辆唯一标识//snapshot.getEntity().getUnid();
 		String key = Conf.PERFIX + unid;
-
 		String fiberId = util.hget(key, "fiber_unid");
-
-		List<String> listStr = util.hmget(alarmKey, fiberId + "_" + event.getCode());
+		String listStr = util.get(alarmKey+fiberId + "_" + event.getCode());
 		ErrorCode errorCode = null;// 获取故障代码库数据 //findErrorCode(
 									// snapshot.getFiberUnid(), event.getCode()
-									// );
-		if (listStr.size() > 0&&listStr.get(0)!=null) {
-			errorCode = JsonUtils.deserialize(listStr.get(0), ErrorCode.class);
+									// );	
+		util.del(alarmKey);
+		util.del(alarmKey+"*");
+		if (listStr != null) {
+			errorCode = JsonUtils.deserialize(listStr, ErrorCode.class);
 		} else {
-			Map<String, String> map = setRedis();
-			if (map.size() > 0) {
-				util.del(alarmKey);
-				util.hmset(alarmKey, map);
+			errorCode = setRedis(fiberId, event.getCode());
+			if (errorCode != null) {
+				util.setex(alarmKey+fiberId + "_" + event.getCode(), JsonUtils.serialize(errorCode),60*60*12);
 			}
-			listStr = util.hmget(alarmKey, fiberId + "_" + event.getCode());
-			errorCode = JsonUtils.deserialize(listStr.get(0), ErrorCode.class);
 		}
-
+		if (errorCode == null) {
+			System.out.println(fiberId + "_" + event.getCode());
+			return;
+		}
 		String domainId = util.hget(key, "domain_unid");
-
-		
+		//System.out.println("分組id"+domainId);
+        
 		try {
-			// connection = jdbc.getConnection();
-			String sql = "insert into sensor.ANA_VEHICLE_EVENT(UNID,ENTITY_UNID,DOMAIN_UNID,SUMMARY,EVENT_TYPE,LAT_D,LON_D,CONTEXT,LEVEL,ERROR_CODE) values(?,?,?,?,?,?,?,?,?,?)";
+			String alamUnid = UNID.getUnid();
+			String tabeSuf = DEFAULT_DATE.format(new Date());
+			String sql = "CALL `sensor`.`insertAlarmEvent`(?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?)";
+			
 
 			List<Object> params = new ArrayList<Object>();
-			params.add(UNID.getUnid());
+			params.add(alamUnid);
 			params.add(unid);
 			params.add(domainId);
+			params.add(event.getDatimeBegin());
+			params.add(alert.getLongitude());
+			params.add(alert.getLatitude());
+			params.add(event.getCode());
+			params.add(errorCode.getUNID());
 			params.add(errorCode != null ? errorCode.getNAME() : "");
 			params.add(eventType);
-			params.add(alert.getLatitude());
-			params.add(alert.getLongitude());
 			params.add(event.getHex());
 			params.add(errorCode != null ? errorCode.getLEVEL() : 0);
-			params.add(event.getCode());
+			params.add(tabeSuf);
+			//System.out.println("CALL `sensor`.`insertAlarmEvent`("+alamUnid+", "+unid+", "+domainId+", "+event.getDatimeBegin()+", "+alert.getLongitude()+","+alert.getLatitude()+", "+event.getCode()+", "+errorCode.getUNID()+", "+errorCode != null ? errorCode.getNAME() : ""+", "+eventType+", "+event.getHex()+", "+errorCode.getLEVEL()+", "+tabeSuf+")");
+			jdbcUtils.updateByPreparedStatement(sql, params);
+			// System.out.println("更新到数据库中的【表情】"+aiid);
+			util.hset(aiid_key + unid, event.getCode(), String.valueOf(alamUnid));
+			util.hset(aiid_key + unid, event.getCode() + "beginTime", tabeSuf);
 
-			int aiid = jdbcUtils.insertByPreparedStatement(sql, params);
-
-			util.hset(aiid_key + unid, event.getCode(), String.valueOf(aiid));
-
-			// PreparedStatement pstmt = connection.prepareStatement( sql,
-			// Statement.RETURN_GENERATED_KEYS );
-			// pstmt.setString( 1, UNID.getUnid() );
-			// pstmt.setString( 2, unid );
-			// pstmt.setString( 3, snapshot.getEntity().getDomainUnid() );
-			// pstmt.setString( 4, errorCode != null ? errorCode.getName() : ""
-			// );
-			// pstmt.setString( 5, eventType );
-			// pstmt.setDouble( 6, snapshot.getLatitudeDeviated() );
-			// pstmt.setDouble( 7, snapshot.getLongitudeDeviated() );
-			// pstmt.setString( 8, event.getHex() );// TODO
-			// pstmt.setInt( 9, errorCode != null ? errorCode.getLevel() : 0 );
-			// pstmt.setString( 10, event.getCode() );// TODO
-			//
-			// //((Object) LOG).fine( "insert event: " + pstmt.toString() );
-			// pstmt.execute();
-			// ResultSet rs = pstmt.getGeneratedKeys();
-			// if (rs.next())
-			// {
-			// int aiid = rs.getInt( 1 );
-			// LOG.info( "alert id:" + aiid );
-			// AlertEvent alert = new AlertEvent();
-			// alert.setAiid( aiid );
-			// alert.setDatimeBegin( DateHelper.getDateYYYY_MM_DD() );
-			// alert.setEntityUnid( unid );
-			// alert.setEventType( Event.EVENT_ALERT );
-			// alert.setTag( event.getCode() );
-			// String alertKey = unid + "_" + aiid;
-			// addEvent( snapshot, alert );
-			// }
-			// pstmt.close();
 		} catch (SQLException e) {
-			// LOG.severe( "get connection锛� " + e.getLocalizedMessage() );
+			//e.printStackTrace();
 		} finally {
-			/// closeConnection( connection );
-			// jdbc.releaseConn();
+			
 		}
 
 		// long alertCount = 0;
@@ -267,59 +239,59 @@ public class HBaseState implements State {
 	 * @Title: updateCondition @Description: TODO固定的时间更新一下判断条件 @param
 	 *         设定文件 @return void 返回类型 @throws
 	 */
-	private void updateCondition() {
-		String timekey = Conf.VEHICLE_CONDITION_ALARM ;
-		String timer = util.hget(timekey, Conf.ACTIVE_CONDITION_TIMER);
-		util = RedisSingleton.instance();
-		// jdbcUtils = SingletonJDBC.getJDBC();
-		if (timer != null) {
-			Date date = StateUntils.strToDate(timer);
-			if (date != null) {
-				long m = new Date().getTime() - date.getTime();
-				if (m > 1000 * 60 * 2) {
-					util.hset(timekey, Conf.ACTIVE_CONDITION_TIMER, StateUntils.formate(new Date()));
-					// 更新数据
-					String alarmKey = Conf.VEHICLE_CONDITION_ALARM_STATUS ;
-					Map<String, String> map = setRedis();
-					if (map.size() > 0) {
-						util.del(alarmKey);
-						util.hmset(alarmKey, map);
-					}
-				}
-			} else {
-				util.hset(timekey, Conf.ACTIVE_CONDITION_TIMER, StateUntils.formate(new Date()));
-			}
-
-		} else {
-			util.hset(timekey, Conf.ACTIVE_CONDITION_TIMER, StateUntils.formate(new Date()));
-		}
-
-	}
+	// private void updateCondition() {
+	// String timekey = Conf.VEHICLE_CONDITION_ALARM ;
+	// String timer = util.hget(timekey, Conf.ACTIVE_CONDITION_TIMER);
+	// util = RedisSingleton.instance();
+	// // jdbcUtils = SingletonJDBC.getJDBC();
+	// if (timer != null) {
+	// Date date = StateUntils.strToDate(timer);
+	// if (date != null) {
+	// long m = new Date().getTime() - date.getTime();
+	// if (m > 1000 * 60 * 5) {
+	// util.hset(timekey, Conf.ACTIVE_CONDITION_TIMER, StateUntils.formate(new
+	// Date()));
+	// // 更新数据
+	// String alarmKey = Conf.VEHICLE_CONDITION_ALARM_STATUS ;
+	// Map<String, String> map = setRedis();
+	// if (map.size() > 0) {
+	// util.del(alarmKey);
+	// util.hmset(alarmKey, map);
+	// }
+	// }
+	// } else {
+	// util.hset(timekey, Conf.ACTIVE_CONDITION_TIMER, StateUntils.formate(new
+	// Date()));
+	// }
+	//
+	// } else {
+	// util.hset(timekey, Conf.ACTIVE_CONDITION_TIMER, StateUntils.formate(new
+	// Date()));
+	// }
+	//
+	// }
 
 	/**
 	 * @return @Title: setRedis @Description: TODO(这里用一句话描述这个方法的作用) @param
 	 *         设定文件 @return void 返回类型 @throws
 	 */
-	private Map<String, String> setRedis() {
+	private ErrorCode setRedis(String fiberId, String code) {
 
-		String sql = "SELECT description,FIBER_UNID ,ERROR_CODE ,name,level   FROM cube.BIG_ERROR_CODE";
+		String sql = "SELECT description,FIBER_UNID ,ERROR_CODE ,name,level ,unid  FROM cube.BIG_ERROR_CODE where fiber_unid='"
+				+ fiberId + "' and error_code='" + code + "'";
 		List<Object> params = new ArrayList<Object>();
-
-		List<ErrorCode> list = null;
+		List<ErrorCode> list = new ArrayList<ErrorCode>();
 		try {
 			list = (List<ErrorCode>) jdbcUtils.findMoreRefResult(sql, params, ErrorCode.class);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		LOG.debug("数据库中数据" + list);
-		Map<String, String> map = new HashMap<String, String>();
-		for (ErrorCode vsbean : list) {
-			map.put(vsbean.getFIBER_UNID() + "_" + vsbean.getERROR_CODE(), JsonUtils.serialize(vsbean));
+		ErrorCode error = null;
+		if (list.size() > 0) {
+			error = list.get(0);
 		}
-
-		return map;
-
+		return error;
 	}
 
 }

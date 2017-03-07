@@ -32,6 +32,7 @@ import org.apache.storm.topology.TopologyBuilder;
 
 import org.apache.storm.tuple.Fields;
 
+import com.wlwl.cube.analyse.bean.LoadData;
 import com.wlwl.cube.analyse.filter.VehicleFilter;
 import com.wlwl.cube.ananlyse.functionsForAlarm.AnalysisAlarmDataFunction;
 import com.wlwl.cube.ananlyse.functionsForAlarm.ChangeForAlarmFunction;
@@ -52,7 +53,9 @@ import org.apache.storm.trident.TridentTopology;
 
 import org.apache.storm.trident.testing.MemoryMapState;
 
+import java.util.Date;
 import java.util.Properties;
+import java.util.Timer;
 
 public class TridentKafkaSpoutAlarm {
 
@@ -68,7 +71,7 @@ public class TridentKafkaSpoutAlarm {
 
 	public TransactionalTridentKafkaSpout createKafkaSpout() {
 		ZkHosts hosts = new ZkHosts(zkUrl);
-		TridentKafkaConfig config = new TridentKafkaConfig(hosts, topicId, "vehicleAlarm");
+		TridentKafkaConfig config = new TridentKafkaConfig(hosts, topicId, "vehicleAlarmAnalysis");
 		config.scheme = new SchemeAsMultiScheme(new StringScheme());
 		// Consume new data from the topic
 		config.ignoreZkOffsets = true;
@@ -95,8 +98,11 @@ public class TridentKafkaSpoutAlarm {
 		TridentTopology tridentTopology = new TridentTopology();
 		// addDRPCStream(tridentTopology, addTridentState(tridentTopology),
 		// drpc);
+		
+		//Timer timer1 = new Timer();
+		//timer1.schedule(new LoadData(), new Date(),1000*60*10);	
 
-		tridentTopology.newStream("spoutVehicle", createKafkaSpout()).parallelismHint(3)
+		tridentTopology.newStream("spoutVehicleAlarm", createKafkaSpout()).parallelismHint(3)
 				.each(new Fields("str"), new CreateVehicleModelFunction(), new Fields("vehicle")).parallelismHint(3)
 				.each(new Fields("vehicle"), new VehicleFilter())
 				.each(new Fields("vehicle"), new DeviceIDForAlarmFunction(), new Fields("deviceId")).parallelismHint(3)

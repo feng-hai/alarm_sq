@@ -3,8 +3,6 @@ package com.wlwl.cube.ananlyse.state;
 import java.io.UnsupportedEncodingException;
 
 public class ByteUtils {
-	
-	
 
 	public static byte[] byteMerger(byte[] byte_1, byte[] byte_2) {
 		byte[] byte_3 = new byte[byte_1.length + byte_2.length];
@@ -77,6 +75,11 @@ public class ByteUtils {
 	public static int getInt(byte[] bb, int index) {
 		return (int) ((((bb[index + 3] & 0xff) << 24) | ((bb[index + 2] & 0xff) << 16) | ((bb[index + 1] & 0xff) << 8)
 				| ((bb[index + 0] & 0xff) << 0)));
+	}
+
+	public static int getIntForThree(byte[] bb, int index) {
+		return (int)(((bb[index + 2] & 0xff) << 16) | ((bb[index + 1] & 0xff) << 8)
+				| ((bb[index + 0] & 0xff) << 0));
 	}
 
 	/**
@@ -387,16 +390,13 @@ public class ByteUtils {
 		}
 		return temp;
 	}
-	
-	
-	public static byte[] getStrToAsciibytes(String str)
-	{
-		byte[] temp =new byte[str.length()];
-		for(int i=0;i<str.length();i++)
-		{
-			temp[i]=(byte)str.charAt(i);
+
+	public static byte[] getStrToAsciibytes(String str) {
+		byte[] temp = new byte[str.length()];
+		for (int i = 0; i < str.length(); i++) {
+			temp[i] = (byte) str.charAt(i);
 		}
-		return temp ;
+		return temp;
 	}
 
 	/**
@@ -437,6 +437,5 @@ public class ByteUtils {
 		}
 		return s;
 	}
-	
 
 }

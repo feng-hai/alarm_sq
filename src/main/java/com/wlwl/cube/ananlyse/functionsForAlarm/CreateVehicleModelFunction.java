@@ -51,7 +51,7 @@ public class CreateVehicleModelFunction extends BaseFunction {
 					ObjectModelOfKafka.class);
 
 			if (vehicle != null) {
-
+				vehicle.setRAW_OCTETS(vehicle.getRAW_OCTETS().toUpperCase());
 				collector.emit(new Values(vehicle));
 			}
 		} catch (Exception e) {

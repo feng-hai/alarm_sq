@@ -105,6 +105,7 @@ public class JdbcUtils {
         }  
         result = pstmt.executeUpdate();  
         flag = result > 0 ? true : false;  
+        pstmt.close();
         return flag;  
     }  
     
@@ -168,6 +169,8 @@ public class JdbcUtils {
                 map.put(cols_name, cols_value);  
             }  
         }  
+        releaseConn();
+        pstmt.close();
         return map;  
     }  
   
@@ -205,7 +208,8 @@ public class JdbcUtils {
             }  
             list.add(map);  
         }  
-  
+        releaseConn();
+        pstmt.close();
         return list;  
     }  
   
@@ -247,6 +251,8 @@ public class JdbcUtils {
                 field.set(resultObject, cols_value);  
             }  
         }  
+        releaseConn();
+        pstmt.close();
         return resultObject;  
   
     }  
@@ -290,6 +296,8 @@ public class JdbcUtils {
             }  
             list.add(resultObject);  
         }  
+        releaseConn();
+        pstmt.close();
         return list;  
     }  
   
@@ -300,10 +308,12 @@ public class JdbcUtils {
         if(resultSet != null){  
             try{  
                 resultSet.close();  
+               
             }catch(SQLException e){  
                 e.printStackTrace();  
             }  
-        }  
+        } 
+      
     }  
    
 	public void checkOnLine() {
@@ -362,15 +372,11 @@ public class JdbcUtils {
         boolean flag = jdbcUtils.updateByPreparedStatement(sql, params); 
         System.out.println(flag);*/  
         
-    	String sql = "SELECT description,ERROR_CODE,FIBER_UNID,level,name FROM cube.BIG_ERROR_CODE";
+        String sql = "SELECT description,FIBER_UNID ,ERROR_CODE ,name,level ,unid  FROM cube.BIG_ERROR_CODE";
 		List<Object> params = new ArrayList<Object>();
 
-
-	
-	
 		List<ErrorCode> list = null;
 		try {
-			List<Map<String, Object>>temp=	jdbcUtils.findModeResult(sql, params);
 			list = (List<ErrorCode>) jdbcUtils.findMoreRefResult(sql, params, ErrorCode.class);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -41,7 +41,8 @@ public class DeviceIDForAlarmFunction extends BaseFunction {
 		try{
 
 		ObjectModelOfKafka vehicleInfo = (ObjectModelOfKafka) tuple.getValueByField("vehicle");
-	  String deviceid =vehicleInfo.getDEVICE_ID();
+	    String deviceid =vehicleInfo.getDEVICE_ID();
+	    System.out.println("报警终端"+deviceid);
 		if (deviceid!=null&&deviceid.length()>0) {
 			
 			collector.emit(new Values(deviceid));

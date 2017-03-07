@@ -22,13 +22,18 @@
  */
 package com.wlwl.cube.analyse.topologyforAlarm;
 
+import java.util.Date;
+import java.util.Timer;
+
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.LocalDRPC;
 import org.apache.storm.StormSubmitter;
 
+import com.wlwl.cube.analyse.bean.LoadData;
 import com.wlwl.cube.analyse.common.Conf;
 import com.wlwl.cube.ananlyse.spout.TridentKafkaSpoutAlarm;
+
 
 /**
  * A sample word count trident topology using transactional kafka spout that has
@@ -90,7 +95,7 @@ public class TridentKafkaTopologyForSaveOCTETS {
 
 		String zkUrl =  Conf.ZKURL;// "master:2181,node1:2181";
 																																			// //
-																																			// the
+																															// the
 																																			// defaults.
 		String brokerUrl = Conf.BROKERURL; // "node3:9092,node1:9092,node2:9092";//
 
@@ -106,12 +111,12 @@ public class TridentKafkaTopologyForSaveOCTETS {
 //		}
 
 		System.out.println("Using Kafka zookeeper url: " + zkUrl + " broker url: " + brokerUrl);
-		TridentKafkaSpoutAlarm kafkaInstance = new TridentKafkaSpoutAlarm(zkUrl, brokerUrl, "octets_up");
+		TridentKafkaSpoutAlarm kafkaInstance = new TridentKafkaSpoutAlarm(zkUrl, brokerUrl, "test_octets_up");
 		if (args.length == 1) {
 			Config conf = new Config();
 			conf.setMaxSpoutPending(20);
 			conf.setMessageTimeoutSecs(300);
-			conf.setNumWorkers(3);
+			conf.setNumWorkers(1);
 			//conf.put("topology.ackers", 0);
 			
 			// submit the consumer topology.

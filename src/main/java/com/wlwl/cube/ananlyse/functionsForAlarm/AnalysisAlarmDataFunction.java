@@ -36,6 +36,7 @@ public class AnalysisAlarmDataFunction extends BaseFunction {
 
 	private static final long serialVersionUID = 4608482736186526306L;
 	private static final String preKey = "BIG_ANALYSIS:";
+
 	@Override
 	public void prepare(Map conf, TridentOperationContext context) {
 	}
@@ -52,18 +53,26 @@ public class AnalysisAlarmDataFunction extends BaseFunction {
 
 		try {
 			ObjectModelOfKafka vehicleInfo = (ObjectModelOfKafka) tuple.getValueByField("vehicle");
-			String temp = vehicleInfo.getRAW_OCTETS().substring(10, 14);
+			// 上汽
+			String temp = vehicleInfo.getRAW_OCTETS().replaceAll("7D01", "7E").replaceAll("7D02", "7D").substring(10,
+					14);
 			Alert alarm = null;
 			if (temp.equals("E702")) {
 				alarm = new OX02E7Alert(vehicleInfo);
-			
+
 			} else if (temp.equals("8B03")) {
 				alarm = new OX038BAlert(vehicleInfo);
+			} else {
+				// 非上汽
+				String temp2 = vehicleInfo.getRAW_OCTETS().replaceAll("7D01", "7E").replaceAll("7D02", "7D")
+						.substring(1, 4);
+				if (temp2.equals("E702")) {
+					alarm = new OX02E7Alert(vehicleInfo);
+				} 
 			}
-			
-             alarm.setDEVICE_ID(vehicleInfo.getDEVICE_ID());
-             alarm.setUnid(vehicleInfo.getUnid());
-             alarm.setNode_unid(vehicleInfo.getNode_unid());
+			alarm.setDEVICE_ID(vehicleInfo.getDEVICE_ID());
+			alarm.setUnid(vehicleInfo.getUnid());
+			alarm.setNode_unid(vehicleInfo.getNode_unid());
 			collector.emit(new Values(alarm));
 
 		} catch (Exception e) {
@@ -71,5 +80,5 @@ public class AnalysisAlarmDataFunction extends BaseFunction {
 			e.printStackTrace();
 		}
 	}
-	
+
 }

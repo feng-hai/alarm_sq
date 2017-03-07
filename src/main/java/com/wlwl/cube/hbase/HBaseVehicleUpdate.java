@@ -88,7 +88,7 @@ public class HBaseVehicleUpdate extends BaseStateUpdater<HBaseState> {
 			}
 		}
 
-		if (currentTime >= lastTime + 1000 * 60 * 5 || vehicles.size() > 200)
+		if (currentTime >= lastTime + 1000 * 60 * 5 || vehicles.size() > 0)
 
 		{
 			// lastTime=currentTime;

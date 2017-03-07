@@ -3,7 +3,7 @@
 <configuration>
 	<property>
 		<name>hbase.rootdir</name>
-		<value>hdfs://namenode.cube:9000/hbase</value>
+		<value>hdfs://GBIOTNN01:9000/hbase</value>
 	</property>
 	<property>
 		<name>hbase.cluster.distributed</name>
@@ -11,6 +11,6 @@
 	</property>
 	<property>
 		<name>hbase.zookeeper.quorum</name>
-		<value>namenode.cube,maria.cube,hyperrouter1.cube,hyperrouter2.cube,datanode1.cube</value>
+		<value>GBIOTNN01,GBIOTDN01,GBIOTDN02,GBIOTDN03,GBIOTDN04</value>
 	</property>
 </configuration>
