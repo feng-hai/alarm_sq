@@ -158,8 +158,8 @@ public class HBaseState implements State {
 		ErrorCode errorCode = null;// 获取故障代码库数据 //findErrorCode(
 									// snapshot.getFiberUnid(), event.getCode()
 									// );	
-		util.del(alarmKey);
-		util.del(alarmKey+"*");
+		//util.del(alarmKey);
+		//util.del(alarmKey+"*");
 		if (listStr != null) {
 			errorCode = JsonUtils.deserialize(listStr, ErrorCode.class);
 		} else {

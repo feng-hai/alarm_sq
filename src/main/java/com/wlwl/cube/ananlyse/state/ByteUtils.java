@@ -1,5 +1,7 @@
 package com.wlwl.cube.ananlyse.state;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.UnsupportedEncodingException;
 
 public class ByteUtils {
@@ -75,6 +77,18 @@ public class ByteUtils {
 	public static int getInt(byte[] bb, int index) {
 		return (int) ((((bb[index + 3] & 0xff) << 24) | ((bb[index + 2] & 0xff) << 16) | ((bb[index + 1] & 0xff) << 8)
 				| ((bb[index + 0] & 0xff) << 0)));
+	}
+
+	public static long byteArrayToInt(byte[] bb, int index) {
+		
+		return ((( ((long) 0 & 0xff) << 32)
+				| (((long) bb[index + 3] & 0xff) << 24) | (((long) bb[index + 2] & 0xff) << 16)
+				| (((long) bb[index + 1] & 0xff) << 8) | (((long) bb[index + 0] & 0xff) << 0)));
+	 }
+	
+	public static int getIntForLittle(byte[] bb, int index) {
+		return (int) ((((bb[index + 0] & 0xff) << 24) | ((bb[index + 1] & 0xff) << 16) | ((bb[index + 2] & 0xff) << 8)
+				| ((bb[index + 3] & 0xff) << 0)));
 	}
 
 	public static int getIntForThree(byte[] bb, int index) {

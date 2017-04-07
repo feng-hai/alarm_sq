@@ -102,7 +102,7 @@ public class OX02E7Alert extends Alert {
 				byte[] array = new byte[12];
 				System.arraycopy(payload, offset + cursor, array, 0, 12);
 				byte type = payload[offset + cursor];
-				int code = ByteUtils.getInt(payload, offset + cursor + 1);
+				long code = ByteUtils.byteArrayToInt(payload, offset + cursor + 1);
 				byte status = payload[offset + cursor + 5];
 
 				//Date datime = BCDUtils.bytesToDate(ByteUtils.getSubBytes(payload, offset + cursor + 5, 6));// fromCompressedBCDArrayToString(
@@ -120,7 +120,7 @@ public class OX02E7Alert extends Alert {
 
 				event.setType(type);
 				event.setStatus(status);
-				event.setCode(Integer.toString(code));
+				event.setCode(String.valueOf(code));
 
 				if (status == STATE_BEGIN) {
 						event.setDatimeBegin(DEFAULT_DATE_SIMPLEDATEFORMAT.format(daTime));

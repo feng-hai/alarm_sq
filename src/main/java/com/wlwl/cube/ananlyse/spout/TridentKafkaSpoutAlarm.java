@@ -75,7 +75,7 @@ public class TridentKafkaSpoutAlarm {
 		config.scheme = new SchemeAsMultiScheme(new StringScheme());
 		// Consume new data from the topic
 		config.ignoreZkOffsets = true;
-		config.startOffsetTime = kafka.api.OffsetRequest.LatestTime(); // -2
+		config.startOffsetTime =0;// kafka.api.OffsetRequest.LatestTime(); // -2
 																		// 从kafka头开始
 																		// -1
 																		// 是从最新的开始
