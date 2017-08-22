@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.wlwl.cube.analyseAlarm</groupId>
 	<artifactId>analysis_alarm</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<name>analysis_alarm</name>
 	<description>分析cube系统的动态数据</description>
 

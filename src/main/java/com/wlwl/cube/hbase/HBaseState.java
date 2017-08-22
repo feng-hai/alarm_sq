@@ -203,7 +203,7 @@ public class HBaseState implements State {
 			util.hset(aiid_key + unid, event.getCode() + "beginTime", tabeSuf);
 
 		} catch (SQLException e) {
-			//e.printStackTrace();
+			LOG.error("插入数据库错误",e);
 		} finally {
 			
 		}
@@ -231,7 +231,7 @@ public class HBaseState implements State {
 			jdbcUtils.updateByPreparedStatement(update.toString(), new ArrayList<Object>());
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error("更新数据库错误",e);
 		}
 		// DBHelper.commitSQL( update.toString() );
 	}
