@@ -178,7 +178,7 @@ public class HBaseState implements State {
 		try {
 			String alamUnid = UNID.getUnid();
 			String tabeSuf = DEFAULT_DATE.format(new Date());
-			String sql = "CALL `sensor`.`insertAlarmEvent`(?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?)";
+			String sql = "CALL `sensor`.`insertAlarmEvent`(?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?,?)";
 			
 
 			List<Object> params = new ArrayList<Object>();
@@ -195,6 +195,7 @@ public class HBaseState implements State {
 			params.add(event.getHex());
 			params.add(errorCode != null ? errorCode.getLEVEL() : 0);
 			params.add(tabeSuf);
+			params.add(0);
 			//System.out.println("CALL `sensor`.`insertAlarmEvent`("+alamUnid+", "+unid+", "+domainId+", "+event.getDatimeBegin()+", "+alert.getLongitude()+","+alert.getLatitude()+", "+event.getCode()+", "+errorCode.getUNID()+", "+errorCode != null ? errorCode.getNAME() : ""+", "+eventType+", "+event.getHex()+", "+errorCode.getLEVEL()+", "+tabeSuf+")");
 			jdbcUtils.updateByPreparedStatement(sql, params);
 			// System.out.println("更新到数据库中的【表情】"+aiid);
