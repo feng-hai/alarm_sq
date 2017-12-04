@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.wlwl.cube.analyseAlarm</groupId>
-	<artifactId>analysis_alarm</artifactId>
+	<artifactId>analysis_alarm_shangqi</artifactId>
 	<version>1.0.1</version>
-	<name>analysis_alarm</name>
+	<name>analysis_alarm_shangqi</name>
 	<description>分析cube系统的动态数据</description>
 
 	<properties>
@@ -32,7 +32,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.wlwl.one.ServerMain</mainClass>
+              <mainClass>cn.wlwl.one.ServerMain</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
