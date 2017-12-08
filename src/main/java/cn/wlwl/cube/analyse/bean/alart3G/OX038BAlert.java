@@ -90,10 +90,10 @@ public class OX038BAlert extends Alert {
 //		LatLng latlng = AMapConvertService.getConvert(new LatLng(String.valueOf(longitude), String.valueOf(latitude)));
 //		longitude = Double.parseDouble(latlng.getLng());
 //		latitude = Double.parseDouble(latlng.getLat());
-//		PointDouble pd = new PointDouble(longitude,latitude);
-//		PointDouble en = Wars2Wgs.s2c(pd);
-//		longitude=en.x;
-//		latitude=en.y;
+		PointDouble pd = new PointDouble(longitude,latitude);
+		PointDouble en = Wars2Wgs.s2c(pd);
+		longitude=en.x;
+		latitude=en.y;
 		eventCount = payload[offset + 8];
 		SimpleDateFormat DEFAULT_DATE_SIMPLEDATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		// eventCount = fromByteToInt( octets[offset] );

@@ -69,7 +69,7 @@ public class HBaseVehicleUpdateAlarm extends BaseStateUpdater<HBaseStateAlarm> {
 			// lastVehicles.put(key, vehicle);
 			//
 			// }
-			if (alert.getLongitude() > 0 && alert.getLatitude() > 0) {
+	//		if (alert.getLongitude() > 0 && alert.getLatitude() > 0) {
 //				LatLng latlng = AMapConvertService
 //						.getConvert(new LatLng(String.valueOf(alert.longitude), String.valueOf(alert.getLatitude())));
 //				// //System.out.println(latln
@@ -77,7 +77,7 @@ public class HBaseVehicleUpdateAlarm extends BaseStateUpdater<HBaseStateAlarm> {
 //				alert.setLatitude(Double.parseDouble(latlng.getLat()));
 
 				vehicles.add(alert);
-			}
+	//		}
 		}
 
 		if ( vehicles.size() > 0)

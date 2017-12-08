@@ -37,7 +37,7 @@ public class OX02E7Alert extends Alert {
 	private Date daTime;
 	public OX02E7Alert(ObjectModelOfKafka heartbeat) {
 		
-		System.out.println("开始OX02E7Alert");
+		//System.out.println("开始OX02E7Alert");
 		String orc = heartbeat.getRAW_OCTETS();
 		daTime=new Date(heartbeat.getTIMESTAMP());
 		orc = orc.substring(2, orc.length() - 2);
@@ -49,7 +49,7 @@ public class OX02E7Alert extends Alert {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("结束OX02E7Alert");
+		//System.out.println("结束OX02E7Alert");
 
 	}
 
@@ -86,10 +86,10 @@ public class OX02E7Alert extends Alert {
 //		// System.out.println(latlng);
 //		longitude = Double.parseDouble(latlng.getLng());
 //		latitude = Double.parseDouble(latlng.getLat());
-//		PointDouble pd = new PointDouble(longitude,latitude);
-//		PointDouble en = Wars2Wgs.s2c(pd);
-//		longitude=en.x;
-//		latitude=en.y;
+		PointDouble pd = new PointDouble(longitude,latitude);
+		PointDouble en = Wars2Wgs.s2c(pd);
+		longitude=en.x;
+		latitude=en.y;
 		eventCount = payload[offset + 8];
 		SimpleDateFormat DEFAULT_DATE_SIMPLEDATEFORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		// eventCount = fromByteToInt( octets[offset] );

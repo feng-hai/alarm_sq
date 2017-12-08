@@ -88,10 +88,11 @@ public class HBaseStateAlarm implements State {
 
 		util = RedisSingleton.instance();
 		jdbcUtils = SingletonJDBC.getJDBC();
-
+		//System.out .println("报警数据："+JsonUtils.serialize(alerts));
 		try {
 
 			for (Alert alert : alerts) {
+				
 				List<GMSEvent> events = alert.getEvents();
 
 				for (GMSEvent event : events) {
@@ -102,15 +103,21 @@ public class HBaseStateAlarm implements State {
 
 					if (event.getType() == TYPE_SYSTEM_ERROR || event.getType() == TYPE_THRESHOLD_ERROR) {
 						if (event.getStatus() == STATE_BEGIN) {
+							
+						//	System.out.println("报警----------------01");
 							String aiid = util.hget(aiid_key + alert.getUnid(), event.getCode());
 							if (aiid != null) {
 								event.setFlagEnd(true);
 								event.setDatimeEnd(DEFAULT_DATE_SIMPLEDATEFORMAT.format(new Date()));
 								alertEnd(event, alert, "alert");
 							}
+						//	System.out.println("报警----------------02");
 							alertBegin(event, alert, "alert");
+						//	System.out.println("报警----------------03");
 						} else if (event.getStatus() == STATE_END)
+						//	System.out.println("报警----------------04");
 							alertEnd(event, alert, "alert");
+						//	System.out.println("报警----------------05");
 					}
 
 				}
@@ -138,6 +145,7 @@ public class HBaseStateAlarm implements State {
 			update.append("')");
 			try {
 				jdbcUtils.updateByPreparedStatement(update.toString(), new ArrayList<Object>());
+				System.out.println("更新到数据库中的【表情】"+aiid);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -175,6 +183,8 @@ public class HBaseStateAlarm implements State {
 		//System.out.println("分組id"+domainId);
         
 		try {
+			
+			System.out.println("新增到数据库中的【表情】开始插入");
 			String alamUnid = UNID.getUnid();
 			String tabeSuf = DEFAULT_DATE.format(new Date());
 			String sql = "CALL `sensor`.`insertAlarmEvent`(?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?,?)";
@@ -197,7 +207,7 @@ public class HBaseStateAlarm implements State {
 			params.add(0);
 			//System.out.println("CALL `sensor`.`insertAlarmEvent`("+alamUnid+", "+unid+", "+domainId+", "+event.getDatimeBegin()+", "+alert.getLongitude()+","+alert.getLatitude()+", "+event.getCode()+", "+errorCode.getUNID()+", "+errorCode != null ? errorCode.getNAME() : ""+", "+eventType+", "+event.getHex()+", "+errorCode.getLEVEL()+", "+tabeSuf+")");
 			jdbcUtils.updateByPreparedStatement(sql, params);
-			// System.out.println("更新到数据库中的【表情】"+aiid);
+			System.out.println("新增到数据库中的【表情】"+alamUnid);
 			util.hset(aiid_key + unid, event.getCode(), String.valueOf(alamUnid));
 			util.hset(aiid_key + unid, event.getCode() + "beginTime", tabeSuf);
 
