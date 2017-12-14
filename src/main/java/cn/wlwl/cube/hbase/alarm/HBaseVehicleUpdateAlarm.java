@@ -83,7 +83,7 @@ public class HBaseVehicleUpdateAlarm extends BaseStateUpdater<HBaseStateAlarm> {
 		if ( vehicles.size() > 0)
 
 		{
-			System.out.println("开始提交");
+			//System.out.println("开始提交");
 			// lastTime=currentTime;
 			//
 			// List<VehicleStatisticBean> vehiclesM = new

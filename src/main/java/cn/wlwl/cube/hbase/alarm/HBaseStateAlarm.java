@@ -30,6 +30,9 @@ import org.apache.storm.trident.state.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
+import cn.wlwl.cube.analyse.bean.alarm.AlarmInfo;
 import cn.wlwl.cube.analyse.bean.alarm.ErrorCode;
 import cn.wlwl.cube.analyse.bean.alarm.GMSEvent;
 import cn.wlwl.cube.analyse.bean.alarm.ObjectModelOfKafka;
@@ -41,6 +44,7 @@ import cn.wlwl.cube.ananlyse.state.alarm.JsonUtils;
 import cn.wlwl.cube.ananlyse.state.alarm.StateUntils;
 import cn.wlwl.cube.ananlyse.state.alarm.TimeBaseRowStrategy;
 import cn.wlwl.cube.ananlyse.state.alarm.UNID;
+import cn.wlwl.cube.kafka.HandlerProducer;
 import cn.wlwl.cube.mysql.JdbcUtils;
 import cn.wlwl.cube.mysql.SingletonJDBC;
 import cn.wlwl.cube.redis.RedisSingleton;
@@ -145,13 +149,23 @@ public class HBaseStateAlarm implements State {
 			update.append("')");
 			try {
 				jdbcUtils.updateByPreparedStatement(update.toString(), new ArrayList<Object>());
-				System.out.println("更新到数据库中的【表情】"+aiid);
+				System.out.println("更新到数据库中的【表情】"+aiid+"--"+update.toString());
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			util.hdel(aiid_key + alert.getUnid(), event.getCode());
 			util.hdel(aiid_key + alert.getUnid(), event.getCode() + "beginTime");
+			
+			AlarmInfo alarm=new AlarmInfo();
+			alarm.setUnid(alert.getUnid());
+			alarm.setCode(event.getCode());
+			alarm.setEndTime(event.getDatimeEnd());
+			alarm.setStatus("0");
+			alarm.setLat(String.valueOf(alert.getLatitude()));
+			alarm.setLng(String.valueOf(alert.getLongitude()));
+			HandlerProducer handler=new HandlerProducer(alarm);
+			handler.run();
 		}
 	}
 
@@ -165,6 +179,7 @@ public class HBaseStateAlarm implements State {
 		ErrorCode errorCode = null;// 获取故障代码库数据 //findErrorCode(
 									// snapshot.getFiberUnid(), event.getCode()
 									// );	
+
 		//util.del(alarmKey);
 		//util.del(alarmKey+"*");
 		if (listStr != null) {
@@ -184,7 +199,7 @@ public class HBaseStateAlarm implements State {
         
 		try {
 			
-			System.out.println("新增到数据库中的【表情】开始插入");
+			//System.out.println("新增到数据库中的【表情】开始插入");
 			String alamUnid = UNID.getUnid();
 			String tabeSuf = DEFAULT_DATE.format(new Date());
 			String sql = "CALL `sensor`.`insertAlarmEvent`(?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?,?)";
@@ -207,9 +222,21 @@ public class HBaseStateAlarm implements State {
 			params.add(0);
 			//System.out.println("CALL `sensor`.`insertAlarmEvent`("+alamUnid+", "+unid+", "+domainId+", "+event.getDatimeBegin()+", "+alert.getLongitude()+","+alert.getLatitude()+", "+event.getCode()+", "+errorCode.getUNID()+", "+errorCode != null ? errorCode.getNAME() : ""+", "+eventType+", "+event.getHex()+", "+errorCode.getLEVEL()+", "+tabeSuf+")");
 			jdbcUtils.updateByPreparedStatement(sql, params);
-			System.out.println("新增到数据库中的【表情】"+alamUnid);
+			//System.out.println("新增到数据库中的【表情】"+alamUnid);
 			util.hset(aiid_key + unid, event.getCode(), String.valueOf(alamUnid));
 			util.hset(aiid_key + unid, event.getCode() + "beginTime", tabeSuf);
+			
+			AlarmInfo alarm=new AlarmInfo();
+			alarm.setUnid(unid);
+			alarm.setCode(event.getCode());
+			alarm.setStartTime(event.getDatimeBegin());
+			alarm.setLevel( String.valueOf(errorCode.getLEVEL()));
+			alarm.setStatus("1");
+			alarm.setLat(String.valueOf(alert.getLatitude()));
+			alarm.setLng(String.valueOf(alert.getLongitude()));
+			HandlerProducer handler=new HandlerProducer(alarm);
+			handler.run();
+		
 
 		} catch (SQLException e) {
 			LOG.error("插入数据库错误",e);

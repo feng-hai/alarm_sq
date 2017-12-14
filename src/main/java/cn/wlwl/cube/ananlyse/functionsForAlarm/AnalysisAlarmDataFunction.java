@@ -52,7 +52,7 @@ public class AnalysisAlarmDataFunction extends BaseFunction {
 
 		try {
 			
-			 System.out.println("报警终端------------111");
+			// System.out.println("报警终端------------111");
 			ObjectModelOfKafka vehicleInfo = (ObjectModelOfKafka) tuple.getValueByField("vehicle");
 			// 上汽
 			String temp = vehicleInfo.getRAW_OCTETS().replaceAll("7D01", "7E").replaceAll("7D02", "7D").substring(10,
@@ -72,13 +72,13 @@ public class AnalysisAlarmDataFunction extends BaseFunction {
 				} 
 			}
 			
-			 System.out.println("报警终端------------2222");
+			// System.out.println("报警终端------------2222");
 			alarm.setDEVICE_ID(vehicleInfo.getDEVICE_ID());
 			alarm.setUnid(vehicleInfo.getUnid());
 			alarm.setNode_unid(vehicleInfo.getNode_unid());
-			 System.out.println("报警终端------------33333");
+			// System.out.println("报警终端------------33333");
 			collector.emit(new Values(alarm));
-			 System.out.println("报警终端------------4444"+JsonUtils.serialize(alarm));
+			// System.out.println("报警终端------------4444"+JsonUtils.serialize(alarm));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
