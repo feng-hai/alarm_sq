@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.wlwl.cube.analyse.bean.alarm.AlarmInfo;
+import cn.wlwl.cube.analyse.common.alarm.Conf;
 
 
 public final class KafkaProducerSingleton {
@@ -61,7 +62,7 @@ public final class KafkaProducerSingleton {
 			
 				//HashMap<String, String> config = PropertyResource.getInstance().getProperties();
 				Properties props = new Properties();
-				props.put("bootstrap.servers", "maria.cube:9092,namenode.cube:9092,datanode1.cube:9092,hyperrouter4.cube:9092,hyperrouter2.cube:9092");
+				props.put("bootstrap.servers",Conf.BROKERURL);
 				//props.put("acks", "1");
 				//props.put("retries", 0);
 				//props.put("producer.type","async"); 

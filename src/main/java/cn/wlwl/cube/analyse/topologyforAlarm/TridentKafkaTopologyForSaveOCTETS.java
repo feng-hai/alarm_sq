@@ -111,7 +111,7 @@ public class TridentKafkaTopologyForSaveOCTETS {
 //		}
 
 		System.out.println("Using Kafka zookeeper url: " + zkUrl + " broker url: " + brokerUrl);
-		TridentKafkaSpoutAlarm kafkaInstance = new TridentKafkaSpoutAlarm(zkUrl, brokerUrl, "test_octets_up");
+		TridentKafkaSpoutAlarm kafkaInstance = new TridentKafkaSpoutAlarm(zkUrl, brokerUrl, "octets_up");
 		if (args.length == 1) {
 			Config conf = new Config();
 			conf.setMaxSpoutPending(20);
