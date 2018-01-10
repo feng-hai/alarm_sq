@@ -159,6 +159,7 @@ public class HBaseStateAlarm implements State {
 			
 			AlarmInfo alarm=new AlarmInfo();
 			alarm.setUnid(alert.getUnid());
+			alarm.setAlarmUnid(aiid);
 			alarm.setCode(event.getCode());
 			alarm.setEndTime(event.getDatimeEnd());
 			alarm.setStatus("0");
@@ -228,6 +229,7 @@ public class HBaseStateAlarm implements State {
 			
 			AlarmInfo alarm=new AlarmInfo();
 			alarm.setUnid(unid);
+			alarm.setAlarmUnid(alamUnid);
 			alarm.setCode(event.getCode());
 			alarm.setStartTime(event.getDatimeBegin());
 			alarm.setLevel( String.valueOf(errorCode.getLEVEL()));

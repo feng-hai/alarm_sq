@@ -10,7 +10,20 @@ public class AlarmInfo implements Serializable {
 	* @Fields serialVersionUID : TODO(用一句话描述这个变量表示什么) 
 	*/ 
 	private static final long serialVersionUID = 1L;
+	public String alarmUnid;
 	
+	/**
+	 * @return the alarmUnid
+	 */
+	public String getAlarmUnid() {
+		return alarmUnid;
+	}
+	/**
+	 * @param alarmUnid the alarmUnid to set
+	 */
+	public void setAlarmUnid(String alarmUnid) {
+		this.alarmUnid = alarmUnid;
+	}
 	public String getUnid() {
 		return unid;
 	}
