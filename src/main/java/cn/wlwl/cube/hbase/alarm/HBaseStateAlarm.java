@@ -316,7 +316,7 @@ public class HBaseStateAlarm implements State {
 	 */
 	private ErrorCode setRedis(String fiberId, String code) {
 
-		String sql = "SELECT description,FIBER_UNID ,ERROR_CODE ,name,level ,unid  FROM cube.BIG_ERROR_CODE where fiber_unid='"
+		String sql = "SELECT description,FIBER_UNID ,ERROR_CODE ,name,level ,unid  FROM cube.BIG_ERROR_CODE where FLAG_DEL=0 and fiber_unid='"
 				+ fiberId + "' and error_code='" + code + "'";
 		List<Object> params = new ArrayList<Object>();
 		List<ErrorCode> list = new ArrayList<ErrorCode>();
